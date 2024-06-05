@@ -1,0 +1,48 @@
+name: Generate 3W2H on Issue Creation
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Generate 3W2H HTML
+      run: |
+        ISSUE_TITLE="${{ github.event.issue.title }}"
+        ISSUE_BODY="${{ github.event.issue.body }}"
+        ISSUE_URL="${{ github.event.issue.html_url }}"
+        ISSUE_NUMBER="${{ github.event.issue.number }}"
+
+        # Cria o HTML com base nas informações do issue
+        cat <<EOF > 3W2H_issue_${ISSUE_NUMBER}.html
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>3W2H Issue #${ISSUE_NUMBER}</title>
+        </head>
+        <body>
+            <h1>3W2H para o Issue #${ISSUE_NUMBER}</h1>
+            <p><strong>What:</strong> ${ISSUE_TITLE}</p>
+            <p><strong>Why:</strong> <!-- Adicione a razão aqui --></p>
+            <p><strong>Where:</strong> <!-- Adicione o local aqui --></p>
+            <p><strong>When:</strong> <!-- Adicione o tempo aqui --></p>
+            <p><strong>How:</strong> <!-- Adicione o método aqui --></p>
+            <p><strong>How Much:</strong> <!-- Adicione o custo aqui --></p>
+            <p><a href="${ISSUE_URL}">Veja o Issue no GitHub</a></p>
+        </body>
+        </html>
+        EOF
+
+    - name: Upload 3W2H HTML as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: 3W2H_issue_${{ github.event.issue.number }}
+        path: 3W2H_issue_${{ github.event.issue.number }}.html
